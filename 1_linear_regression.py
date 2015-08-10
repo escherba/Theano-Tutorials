@@ -8,8 +8,10 @@ trY = 2 * trX + np.random.randn(*trX.shape) * 0.33
 X = T.scalar()
 Y = T.scalar()
 
+
 def model(X, w):
     return X * w
+
 
 w = theano.shared(np.asarray(0., dtype=theano.config.floatX))
 y = model(X, w)
@@ -21,8 +23,13 @@ updates = [[w, w - gradient * 0.01]]
 train = theano.function(inputs=[X, Y], outputs=cost, updates=updates, allow_input_downcast=True)
 
 for i in range(100):
+    slopes = []
+    costs = []
     for x, y in zip(trX, trY):
-        train(x, y)
-        
-print w.get_value() #something around 2
+        slope = w.get_value()
+        slopes.append(slope)
+        cost = train(x, y)
+        costs.append(cost)
+    print i, np.average(slopes), np.average(costs)
 
+print w.get_value()  # something around 2

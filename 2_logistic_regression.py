@@ -3,14 +3,18 @@ from theano import tensor as T
 import numpy as np
 from load import mnist
 
+
 def floatX(X):
     return np.asarray(X, dtype=theano.config.floatX)
+
 
 def init_weights(shape):
     return theano.shared(floatX(np.random.randn(*shape) * 0.01))
 
+
 def model(X, w):
     return T.nnet.softmax(T.dot(X, w))
+
 
 trX, teX, trY, teY = mnist(onehot=True)
 
@@ -29,8 +33,10 @@ update = [[w, w - gradient * 0.05]]
 train = theano.function(inputs=[X, Y], outputs=cost, updates=update, allow_input_downcast=True)
 predict = theano.function(inputs=[X], outputs=y_pred, allow_input_downcast=True)
 
+batch_size = 64
+print "e", "accuracy"
+Yground = np.argmax(teY, axis=1)
 for i in range(100):
-    for start, end in zip(range(0, len(trX), 128), range(128, len(trX), 128)):
+    for start, end in zip(range(0, len(trX), batch_size), range(batch_size, len(trX), batch_size)):
         cost = train(trX[start:end], trY[start:end])
-    print i, np.mean(np.argmax(teY, axis=1) == predict(teX))
-
+    print i, np.mean(Yground == predict(teX))
